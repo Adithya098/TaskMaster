@@ -13,10 +13,10 @@ app.app_context().push()
 users = User.query.all()
 
 # Prepare data for tabulate
-table = [["User ID", "Username", "Email", "Password"]]
+table = [["User ID", "Username", "Email", "Password","User Type"]]
 for user in users:
     obscured_password = "**********" if user.password else ""
-    table.append([user.id, user.username, user.email, obscured_password])
+    table.append([user.id, user.username, user.email, obscured_password,user.user_type])
 
 # Print user details in a table format
 print(tabulate(table, headers="firstrow", tablefmt="grid"))

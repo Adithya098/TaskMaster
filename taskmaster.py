@@ -29,7 +29,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(200), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    assigned_tasks = db.relationship('Task', backref='assigned_user', lazy=True, overlaps="assigned_user",primaryjoin="User.id == Task.user_id")
+    user_type = db.Column(db.String(20))  # Add this line for user type
+    
 
 
 @login_manager.user_loader
@@ -43,10 +44,6 @@ class Task(db.Model):
     priority = db.Column(db.Integer, nullable=False)
     deadline = db.Column(db.String(80), nullable=False)
     progress = db.Column(db.String(50), nullable=False, default="To Do")
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # Define the user_id column
-
-    # Define relationship with User model
-    user = db.relationship("User", backref=db.backref("tasks", lazy=True))
 
     def __repr__(self):
         return '<Task %r>' % self.name
@@ -59,42 +56,38 @@ class Task(db.Model):
             'priority': self.priority,
             'deadline': self.deadline,
             'progress': self.progress,
-            'user_id': self.user_id  # user_id in the dictionary representation
         }
 
 @app.before_request
 def create_tables():
     # The following line will remove this handler, making it
-    # only run on the first request
     app.before_request_funcs[None].remove(create_tables)
     db.create_all()
 
 @app.route('/')
 @login_required
 def index():
-    # Fetch only the tasks associated with the current user
-    tasks = Task.query.filter_by(user_id=current_user.id).all()
-    return render_template('taskmasterpage.html', tasks=tasks)
+    # Fetch all tasks associated with the current user
+    tasks = Task.query.all()
+    
+    # Categorize tasks by progress for the Kanban board
+    todo_tasks = [task for task in tasks if task.progress == 'To Do']
+    doing_tasks = [task for task in tasks if task.progress == 'In-Progress']
+    done_tasks = [task for task in tasks if task.progress == 'Completed']
+    
+    # Pass all tasks and categorized tasks to the template
+    return render_template('taskmasterpage.html', tasks=tasks, todo_tasks=todo_tasks, doing_tasks=doing_tasks, done_tasks=done_tasks)
 
 
 @app.route('/tasks', methods=['POST'])
-@login_required
 def add_task():
     data = request.json
-    task_name = data['name']
-    
-    # Check if a task with the same name already exists
-    existing_task = Task.query.filter_by(name=task_name, user_id=current_user.id).first()
-    if existing_task:
-        return jsonify({'message': 'A task with this name already exists for the current user'}), 409  # HTTP 409 Conflict
-
     new_task = Task(
-        name=task_name,
+        name=data['name'],
         description=data.get('description', ''),
         priority=data['priority'],
         deadline=data['deadline'],
-        progress=data.get('progress', 'To Do'),  # Default progress is "To Do"
-        user_id=current_user.id  # Assign the current user's ID to the task
+        progress=data.get('progress', 'To Do')
     )
     db.session.add(new_task)
     db.session.commit()
@@ -104,35 +97,35 @@ def add_task():
 @app.route('/tasks', methods=['GET'])
 @login_required
 def get_tasks():
-    # Fetch only the tasks associated with the current user
-    tasks = Task.query.filter_by(user_id=current_user.id).all()
+    # Fetch all tasks
+    tasks = Task.query.all()
     return jsonify([task.to_dict() for task in tasks])
 
 @app.route('/tasks/<int:id>', methods=['GET'])
 @login_required
 def get_task(id):
+    # Fetch a specific task by id
     task = Task.query.get_or_404(id)
     return jsonify(task.to_dict())
+
 
 @app.route('/tasks/<int:task_id>', methods=['PUT'])
 @login_required
 def update_task(task_id):
     task = Task.query.get(task_id)
     if task:
-        # Check if the task belongs to the current user
-        if task.user_id == current_user.id:
-            data = request.get_json()
-            task.name = data['name']
-            task.description = data.get('description', task.description)
-            task.priority = data['priority']
-            task.deadline = data['deadline']
-            task.progress = data.get('progress', task.progress)
-            db.session.commit()
-            return jsonify(task.to_dict()), 200
-        else:
-            return jsonify({'message': 'You are not authorized to update this task'}), 403  # HTTP 403 Forbidden
+        data = request.get_json()
+        task.name = data.get('name', task.name)
+        task.description = data.get('description', task.description)
+        task.priority = data.get('priority', task.priority)
+        task.deadline = data.get('deadline', task.deadline)
+        task.progress = data.get('progress', task.progress)
+        db.session.commit()
+        return jsonify(task.to_dict()), 200
     else:
         return jsonify({'message': 'Task not found'}), 404
+
+
 
 @app.route('/tasks/<int:task_id>', methods=['DELETE'])
 @login_required
@@ -173,19 +166,25 @@ def signup():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+        user_type = request.form.get('userType')  # Get the user type from the form
+        
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
             flash('Email address already registered. Please login.', 'warning')
             return redirect(url_for('login'))
+        
         if not username or not email or not password:
             flash('Missing username, email, or password.', 'warning')
             return redirect(url_for('signup'))
+        
         hashed_password = generate_password_hash(password)
-        user = User(username=username, email=email, password=hashed_password)
+        user = User(username=username, email=email, password=hashed_password, user_type=user_type)  # Add user_type to the User object
         db.session.add(user)
         db.session.commit()
+        
         flash('Account created successfully! Please log in.', 'success')
         return redirect(url_for('login'))
+    
     return render_template('signuppage.html')
 
 @login_manager.unauthorized_handler

@@ -72,3 +72,21 @@ body {
     display: block;
 }
 
+.task {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.task-todo {
+    background-color: #0056b3;
+    
+}
+.task-inprogress {
+    background-color: #c6bd04;
+}
+.task-completed {
+    background-color: #3bc600;
+}
+  
