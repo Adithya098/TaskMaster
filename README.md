@@ -1,12 +1,58 @@
-The project involves building a task management web application, "TaskMaster," using HTML, CSS, JavaScript, and Python with Flask, backed by a SQLite database. 
-It includes features like CRUD operations, validation, and optional user authentication, along with a Kanban chart where project managers have full access and developers can only change task statuses.
+# TaskMaster - A Task Management Web Application
 
-Run this file: taskmaster.py  and launch the URL provided after running the python file.
+**TaskMaster** is a comprehensive task management tool designed to help teams and individuals organize their work. The application allows users to create, view, update, and delete tasks, with additional features like Kanban boards, and user authentication to enhance task management and project tracking.
+
+## Key Features
+
+- **Task Management**: Create, view, update, and delete tasks with detailed information.
+- **Kanban Board**: Visualize task statuses across different stages.
+- **User Authentication**: Secure access with role-based permissions for project managers and developers.
+- **Backend**: Powered by Flask and SQLAlchemy, with a SQLite database for data storage.
+
+## Tech Stack
+
+- **Frontend**: HTML, CSS, JavaScript
+- **Backend**: Python (Flask)
+- **Database**: SQLite
+- **Authentication**: Flask-Login 
+
+## Roles and Permissions
+
+### Manager
+
+- **Full Control**: Managers have full access to all features within the application.
+- **Task Creation**: Managers can create new tasks, specifying the title, description, due date, and status.
+- **Task Editing**: Managers can edit all fields of a task, including:
+  - **Title**: Modify the title of the task.
+  - **Description**: Update the task's detailed description.
+  - **Due Date**: Change the due date of the task.
+  - **Status**: Update the task's status (e.g., "To Do," "In Progress," "Completed").
+- **Task Deletion**: Managers can delete tasks when they are no longer needed.
+
+
+### Employee (Developer)
+
+- **Limited Editing**: Employees have restricted access to the task management features.
+- **Task Creation**: Employees cannot create Task
+- **Task Status Update**: Employees can only update the status of tasks assigned to them (e.g., changing from "To Do" to "In Progress").
+- **View Tasks**: Employees can view all tasks assigned to them but cannot modify the title, description, or due date.
+- **No Task Deletion**: Employees do not have permission to delete tasks.
+- **Task Assignment**: Employees can see which tasks have been assigned to them by the manager but cannot reassign tasks.
+
+## Setup Instructions
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/TaskMaster.git
+   cd TaskMaster
+   pip install -r requirements.txt
+   python taskmaster.py
 
 UI of Manager
-<img width="1219" alt="image" src="https://github.com/user-attachments/assets/9a2f9dea-33b5-43ae-914d-5062529012f9">
+<img width="1221" alt="image" src="https://github.com/user-attachments/assets/c8f112bd-a385-4943-8147-d27864ba3b81">
 
 UI of Employee
-<img width="1228" alt="image" src="https://github.com/user-attachments/assets/a178097d-5328-4e26-9655-a9cc13b5dad4">
+<img width="1236" alt="image" src="https://github.com/user-attachments/assets/da7af35e-a115-4d11-a7ca-2b34f266e5e1">
 
+## Watch the video 'TaskManager Execution.mp4' attached in this repo for a live demo of the application.
 
