@@ -54,5 +54,5 @@ UI of Manager
 UI of Employee
 <img width="1236" alt="image" src="https://github.com/user-attachments/assets/da7af35e-a115-4d11-a7ca-2b34f266e5e1">
 
-## Watch the video 'TaskManager Execution.mp4' attached in this repo for a live demo of the application.
+#### Watch the video 'TaskManager Execution.mp4' attached in this repo for a live demo of the application.
 
